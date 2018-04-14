@@ -1178,7 +1178,7 @@ int _adventurer(struct gameState *state, int currentPlayer, int* temphand) {
 	}
 
 	while (z - 1 >= 0) {
-		state->discard[currentPlayer][state->discardCount[currentPlayer]++] = temphand[z - 1]; // discard all cards in play that have been drawn
+		state->discard[currentPlayer][state->discardCount[currentPlayer]++] = temphand[z]; // discard all cards in play that have been drawn
 		z = z - 1;
 	}
 
@@ -1200,7 +1200,7 @@ int _smithy(struct gameState *state, int currentPlayer, int handPos) {
 	}
 
 	//Discard card from hand
-	discardCard(handPos, currentPlayer, state, 0);
+	discardCard(currentPlayer, handPos, state, 0);
 	return 0;
 }
 
@@ -1220,7 +1220,7 @@ int _village(struct gameState *state, int currentPlayer, int handPos) {
 	state->numActions = state->numActions + 2;
 
 	//discard played card from hand
-	discardCard(handPos, currentPlayer, state, 0);
+	discardCard(handPos, currentPlayer, state, 1);
 	return 0;
 }
 
@@ -1238,7 +1238,7 @@ int _village(struct gameState *state, int currentPlayer, int handPos) {
 int _mine(struct gameState *state, int currentPlayer, int handPos, int choice1, int choice2) {
 	int j = state->hand[currentPlayer][choice1];  //store card we will trash
 
-	if (state->hand[currentPlayer][choice1] < copper || state->hand[currentPlayer][choice1] > gold) {
+	if (state->hand[currentPlayer][choice1] < copper && state->hand[currentPlayer][choice1] > gold) {
 		return -1;	//Invalid-- must select treasure card (copper - gold)
 	}
 
