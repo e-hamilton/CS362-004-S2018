@@ -840,15 +840,7 @@ int cardEffect(int card, int choice1, int choice2, int choice3, struct gameState
 		return 0;
 
 	case great_hall:
-		//+1 Card
-		drawCard(currentPlayer, state);
-
-		//+1 Actions
-		state->numActions++;
-
-		//discard card from hand
-		discardCard(handPos, currentPlayer, state, 0);
-		return 0;
+		return _great_hall(state, currentPlayer, handPos);
 
 	case minion:
 		//+1 action
@@ -1296,6 +1288,27 @@ int _embargo(struct gameState *state, int currentPlayer, int handPos, int choice
 	return 0;
 }
 
+/*
+**	NAME:		_great_hall
+**	PARAMS:		pointer to game state struct, number of current player, hand position
+**	OUTPUT:		returns 0 on successful completion.
+**	SUMMARY:	The great_hall card moves a card from the player's deck to his/her
+**				hand and increases the number of actions by 1. The played card is
+**				discarded to the playedCards pile.
+*/
+int _great_hall(struct gameState *state, int currentPlayer, int handPos) {
+	//+1 Card
+	drawCard(currentPlayer, state);
+
+	//+1 Actions
+	state->numActions++;
+
+	//discard card from hand
+	discardCard(handPos, currentPlayer, state, 0);
+	
+	return 0;
+}
+
 int discardCard(int handPos, int currentPlayer, struct gameState *state, int trashFlag)
 {
 
@@ -1403,4 +1416,3 @@ int updateCoins(int player, struct gameState *state, int bonus)
 
 
 //end of dominion.c
-

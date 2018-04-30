@@ -16,4 +16,5 @@ int _smithy(struct gameState *state, int currentPlayer, int handPos);
 int _village(struct gameState *state, int currentPlayer, int handPos);
 int _mine(struct gameState *state, int currentPlayer, int handPos, int choice1, int choice2);
 int _embargo(struct gameState *state, int currentPlayer, int handPos, int choice1);
+int _great_hall(struct gameState *state, int currentPlayer, int handPos);
 #endif
