@@ -83,5 +83,32 @@ unittestresults.out: unittest1.c unittest2.c unittest3.c unittest4.c cardtest1.c
 	cardtest4 >> unittestresults.out
 	gcov -b -f dominion.c >> unittestresults.out
 
+randomtestcard1.out: randomtestcard1.c dominion.o rngs.o
+	echo "Results for running tests on randomtestcard1.c:" > randomtestcard1.out
+	gcc -g -o randomtestcard1 randomtestcard1.c dominion.o rngs.o $(CFLAGS)
+	randomtestcard1 >> randomtestcard1.out
+	echo "Coverage Results for dominion.c" >> randomtestcard1.out
+	gcov -b -f dominion.c >> randomtestcard1.out
+	echo "Coverage Results for randomtestcard1.c" >> randomtestcard1.out
+	gcov -b -f randomtestcard1.c >> randomtestcard1.out
+
+randomtestcard2.out: randomtestcard2.c dominion.o rngs.o
+	echo "Results for running tests on randomtestcard2.c:" > randomtestcard2.out
+	gcc -g -o randomtestcard2 randomtestcard2.c dominion.o rngs.o $(CFLAGS)
+	randomtestcard2 >> randomtestcard2.out
+	echo "Coverage Results for dominion.c" >> randomtestcard2.out
+	gcov -b -f dominion.c >> randomtestcard2.out
+	echo "Coverage Results for randomtestcard2.c" >> randomtestcard2.out
+	gcov -b -f randomtestcard2.c >> randomtestcard2.out
+
+randomtestadventurer.out: randomtestadventurer.c dominion.o rngs.o
+	echo "Results for running tests on randomtestadventurer.c:" > randomtestadventurer.out
+	gcc -g -o randomtestadventurer randomtestadventurer.c dominion.o rngs.o $(CFLAGS)
+	randomtestadventurer >> randomtestadventurer.out
+	echo "Coverage Results for dominion.c" >> randomtestadventurer.out
+	gcov -b -f dominion.c >> randomtestadventurer.out
+	echo "Coverage Results for randomtestadventurer.c" >> randomtestadventurer.out
+	gcov -b -f randomtestadventurer.c >> randomtestadventurer.out
+
 clean:
-	rm -f *.o *.exe *.gcov *.gcda *.gcno *.so *.out testDrawCard testDrawCard.exe unittest1 unittest2 unittest3 unittest4 cardtest1 cardtest2 cardtest3 cardtest4
+	rm -f *.o *.exe *.gcov *.gcda *.gcno *.so *.out testDrawCard testDrawCard.exe unittest1 unittest2 unittest3 unittest4 cardtest1 cardtest2 cardtest3 cardtest4 randomtestcard1 randomtestcard2 randomtestadventurer
