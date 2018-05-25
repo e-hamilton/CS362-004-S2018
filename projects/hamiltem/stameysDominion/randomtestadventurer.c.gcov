@@ -1,0 +1,571 @@
+        -:    0:Source:randomtestadventurer.c
+        -:    0:Graph:randomtestadventurer.gcno
+        -:    0:Data:randomtestadventurer.gcda
+        -:    0:Runs:1
+        -:    0:Programs:1
+        -:    1:/*
+        -:    2:**	Emily Hamilton (ONID: hamiltem, ID: 933281100)
+        -:    3:**	Assignment 4 - CS362 Spring 2018
+        -:    4:**	Due 5/13/18
+        -:    5:*/
+        -:    6:
+        -:    7:/*
+        -:    8:**		~     RANDOM CARD TEST ADVENTURER     ~
+        -:    9:**	File:				randomtestadventurer.c
+        -:   10:**	Card Tested:		Adventurer
+        -:   11:**	Code Origin:		dominion_helpers.h, dominion.c
+        -:   12:*/
+        -:   13:
+        -:   14:#include "dominion.h"
+        -:   15:#include "dominion_helpers.h"
+        -:   16:#include "rngs.h"
+        -:   17:#include <stdio.h>
+        -:   18:#include <stdlib.h>
+        -:   19:#include <string.h>
+        -:   20:#include <time.h>
+        -:   21:
+        -:   22:#define NUM_TESTS 2000
+        -:   23:
+        -:   24:/* Global Variables */
+        -:   25:int numPass;
+        -:   26:int numFail;
+        -:   27:int totalPasses;
+        -:   28:int totalFailures;
+        -:   29:
+        -:   30:/* Function prototypes */
+        -:   31:int getRandNum(int min, int max);
+        -:   32:int getRandNumPosNeg();
+        -:   33:int assertEqual(int a, int b);
+        -:   34:void testResults(struct gameState *state, struct gameState *oracle, int activePlayer, int handPos, int availableTreasureDeck);
+        -:   35:
+function main called 1 returned 100% blocks executed 99%
+        1:   36:int main()
+        -:   37:{
+        -:   38:	int numPlayers,
+        -:   39:		activePlayer,
+        -:   40:		handPos,
+        -:   41:		choice1,
+        -:   42:		choice2,
+        -:   43:		choice3,
+        -:   44:		bonus,
+        -:   45:		i, j,
+        -:   46:		result,
+        -:   47:		currentTest,
+        -:   48:		availableTreasureDeck,
+        -:   49:		availableTreasureDiscard,
+        -:   50:		randTreasureCard;
+        -:   51:	
+        -:   52:	double percentPass, 
+        -:   53:		percentFailure;
+        -:   54:	
+        -:   55:	time_t seed;
+        -:   56:
+        -:   57:	//Declare test gameState structs
+        -:   58:	struct gameState state, oracle;
+        -:   59:	
+        1:   60:	printf("-------------------- RANDOM CARD TEST ADVENTURER ---------------------\n\n");
+call    0 returned 100%
+        -:   61:
+        -:   62:	// Use time to set seed for random number generation
+        1:   63:	seed = time(NULL);
+call    0 returned 100%
+        1:   64:	srand(time(NULL));
+call    0 returned 100%
+call    1 returned 100%
+        1:   65:	printf("Seed: %lld\n", (long long) seed);
+call    0 returned 100%
+        -:   66:
+        1:   67:	totalFailures = 0;
+        1:   68:	totalPasses = 0;
+        -:   69:
+     2001:   70:	for (currentTest = 0; currentTest < NUM_TESTS; currentTest++) {
+branch  0 taken 99%
+branch  1 taken 1% (fallthrough)
+        -:   71:
+     2000:   72:		printf("TEST %d --------------------------------------------------------------\n", currentTest);
+call    0 returned 100%
+        -:   73:
+        -:   74:		// Initialize test counts
+     2000:   75:		numPass = 0;
+     2000:   76:		numFail = 0;
+        -:   77:
+        -:   78:		//Randomize contents of GameState state 
+ 52602000:   79:		for (i = 0; i < sizeof(struct gameState); i++) {
+branch  0 taken 99%
+branch  1 taken 1% (fallthrough)
+ 52600000:   80:			((char*)&state)[i] = getRandNum(0, 256);
+call    0 returned 100%
+        -:   81:		}
+        -:   82:
+        -:   83:		/*	Randomly generate values that could influence how Adventurer functions	*/
+        -:   84:
+        -:   85:		// Number of players
+     2000:   86:		numPlayers = getRandNum(0, MAX_PLAYERS);
+call    0 returned 100%
+     2000:   87:		state.numPlayers = numPlayers;
+     2000:   88:		printf("Number of Players: %d\n", numPlayers);
+call    0 returned 100%
+        -:   89:
+        -:   90:		// Select active player
+     2000:   91:		activePlayer = getRandNum(0, MAX_PLAYERS - 1);
+call    0 returned 100%
+     2000:   92:		state.whoseTurn = activePlayer;
+     2000:   93:		printf("Active Player: %d\n", activePlayer);
+call    0 returned 100%
+        -:   94:
+        -:   95:		// Players' Hand Counts: I originally set the upper bounds of this range to MAX_HAND
+        -:   96:		// - 2 to accommodate at most 2 additional treasure cards added to the player's hand,
+        -:   97:		// but a bug in Adventurer (where the function does not check for the return value of
+        -:   98:		// drawnCard) can lead cards from the player's hand to be moved from the player's hand
+        -:   99:		// to tempHand, which has a size of 500 = MAX_HAND = MAX_DECK. Since cards can feasibly
+        -:  100:		// be funneled into tempHand from the player's deck, hand, or discard arrays, I saw
+        -:  101:		// the need to restrict the maximum possible count for each to MAX_HAND / 3. 
+    10000:  102:		for (i = 0; i < MAX_PLAYERS; i++) {
+branch  0 taken 80%
+branch  1 taken 20% (fallthrough)
+     8000:  103:			state.handCount[i] = getRandNum(0, MAX_HAND / 3);
+call    0 returned 100%
+     8000:  104:			printf("Hand Size Player %d: %d\n", i, state.handCount[i]);
+call    0 returned 100%
+        -:  105:		}
+        -:  106:
+        -:  107:		// Hand Position of Adventurer card in player's hand (maximum possible index is
+        -:  108:		// MAX_HAND - 1; cannot be negative or it will cause memory access violations)
+     2000:  109:		handPos = getRandNum(0, MAX_HAND - 1);
+call    0 returned 100%
+     2000:  110:		printf("Hand Position of Adventurer: %d\n", handPos);
+call    0 returned 100%
+        -:  111:
+        -:  112:		// Players' Hand Contents
+    10000:  113:		for (i = 0; i < MAX_PLAYERS; i++) {
+branch  0 taken 80%
+branch  1 taken 20% (fallthrough)
+  4008000:  114:			for (j = 0; j < MAX_HAND; j++) {
+branch  0 taken 99%
+branch  1 taken 1% (fallthrough)
+  4000000:  115:				state.hand[i][j] = getRandNum(0, treasure_map);
+call    0 returned 100%
+        -:  116:			}
+        -:  117:		}
+     2000:  118:		state.hand[activePlayer][handPos] = adventurer;
+        -:  119:		
+        -:  120:		// Players' Deck Counts: I originally defined the upper limit of deckCount to be
+        -:  121:		// MAX_DECK, but due to the bug I described above for handCount, I had to restrict
+        -:  122:		// it to MAX_HAND / 3. 
+    10000:  123:		for (i = 0; i < MAX_PLAYERS; i++) {
+branch  0 taken 80%
+branch  1 taken 20% (fallthrough)
+     8000:  124:			state.deckCount[i] = getRandNum(0, MAX_HAND / 3);
+call    0 returned 100%
+     8000:  125:			printf("Deck Size Player %d: %d\n", i, state.deckCount[i]);
+call    0 returned 100%
+        -:  126:		}
+        -:  127:
+        -:  128:		// Deck contents for each player
+    10000:  129:		for (i = 0; i < MAX_PLAYERS; i++) {
+branch  0 taken 80%
+branch  1 taken 20% (fallthrough)
+  4008000:  130:			for (j = 0; j < MAX_DECK; j++) {
+branch  0 taken 99%
+branch  1 taken 1% (fallthrough)
+  4000000:  131:				state.deck[i][j] = getRandNum(0, treasure_map);
+call    0 returned 100%
+        -:  132:			}
+        -:  133:		}
+        -:  134:
+        -:  135:		// Players' Discard Counts: I originally defined the upper limit of deckCount to be
+        -:  136:		// MAX_DECK, but due to the bug I described above for handCount, I had to restrict
+        -:  137:		// it to MAX_HAND / 3. Additionally, in testing, I found that I still could not get
+        -:  138:		// the while (drawntreasure < 2) {...} loop to terminate without potentially causing
+        -:  139:		// undefined behavior later in the function (for instance, a negative handCount or
+        -:  140:		// z > MAX_HAND), so I had to resort to forcing my test cases to include at least two
+        -:  141:		// randomly selected treasure cards in the discard pile. I could, however, get the tests
+        -:  142:		// to work if the player's deck did not have any treasure cards. The bare minimum
+        -:  143:		// requirement to avoid a crash seems to be to have at least 2 treasure cards in the
+        -:  144:		// active player's discard array. Therefore, the lower limit for discardCount is 2.
+    10000:  145:		for (i = 0; i < MAX_PLAYERS; i++) {
+branch  0 taken 80%
+branch  1 taken 20% (fallthrough)
+     8000:  146:			state.discardCount[i] = getRandNum(2, MAX_HAND / 3);
+call    0 returned 100%
+     8000:  147:			printf("Discard Count Player %d: %d\n", i, state.discardCount[i]);
+call    0 returned 100%
+        -:  148:		}
+        -:  149:
+        -:  150:		// Discard contents for each player
+    10000:  151:		for (i = 0; i < MAX_PLAYERS; i++) {
+branch  0 taken 80%
+branch  1 taken 20% (fallthrough)
+  4008000:  152:			for (j = 0; j < MAX_DECK; j++) {
+branch  0 taken 99%
+branch  1 taken 1% (fallthrough)
+  4000000:  153:				state.discard[i][j] = getRandNum(0, treasure_map);
+call    0 returned 100%
+        -:  154:			}
+        -:  155:		}
+        -:  156:		
+        -:  157:		// As per comment above, to avoid crashes, discard pile must contain at least two treasures
+     2000:  158:		i = getRandNum(1, 3);
+call    0 returned 100%
+     2000:  159:		if (i == 1) {
+branch  0 taken 33% (fallthrough)
+branch  1 taken 67%
+      661:  160:			randTreasureCard = copper;
+        -:  161:		}
+     1339:  162:		else if (i == 2) {
+branch  0 taken 48% (fallthrough)
+branch  1 taken 52%
+      648:  163:			randTreasureCard = silver;
+        -:  164:		}
+        -:  165:		else {
+      691:  166:			randTreasureCard = gold;
+        -:  167:		}
+     2000:  168:		i = getRandNum(0, state.discardCount[activePlayer] - 1);
+call    0 returned 100%
+     2000:  169:		state.discard[activePlayer][i] = randTreasureCard;
+        -:  170:		do {
+     2058:  171:			j = getRandNum(0, state.discardCount[activePlayer] - 1);
+call    0 returned 100%
+     2058:  172:		} while (i == j);
+branch  0 taken 3%
+branch  1 taken 97% (fallthrough)
+     2000:  173:		state.discard[activePlayer][j] = randTreasureCard;
+        -:  174:
+        -:  175:		// playedCardCount
+     2000:  176:		state.playedCardCount = getRandNum(0, MAX_DECK);
+call    0 returned 100%
+     2000:  177:		printf("Played Card Count = %d\n", state.playedCardCount);
+call    0 returned 100%
+        -:  178:
+        -:  179:		// Randomize values of choices/bonus passed to cardEffect-- none of these should have
+        -:  180:		// an effect on Smithy, since smithy does not require choice parameters or make a
+        -:  181:		// call to updateCoins() with a bonus.
+     2000:  182:		state.coins = getRandNumPosNeg();	//No range defined
+call    0 returned 100%
+     2000:  183:		choice1 = getRandNumPosNeg();
+call    0 returned 100%
+     2000:  184:		choice2 = getRandNumPosNeg();
+call    0 returned 100%
+     2000:  185:		choice3 = getRandNumPosNeg();
+call    0 returned 100%
+     2000:  186:		bonus = getRandNumPosNeg();
+call    0 returned 100%
+     2000:  187:		printf("Coins: %d\n", state.coins);
+call    0 returned 100%
+     2000:  188:		printf("Choice 1: %d\n", choice1);
+call    0 returned 100%
+     2000:  189:		printf("Choice 2: %d\n", choice2);
+call    0 returned 100%
+     2000:  190:		printf("Choice 3: %d\n", choice3);
+call    0 returned 100%
+     2000:  191:		printf("Bonus: %d\n", bonus);
+call    0 returned 100%
+        -:  192:
+        -:  193:		/*	Copy state to oracle	*/
+     2000:  194:		memcpy(&oracle, &state, sizeof(struct gameState));
+        -:  195:
+        -:  196:		// Figure out how much treasure the player can possibly draw from the deck vs. the 
+        -:  197:		// discard pile
+     2000:  198:		availableTreasureDeck = 0;
+     2000:  199:		availableTreasureDiscard = 0;
+   166750:  200:		for (i = 0; i < state.deckCount[activePlayer]; i++) {
+branch  0 taken 99%
+branch  1 taken 1% (fallthrough)
+   164750:  201:			if (state.deck[activePlayer][i] >= copper && state.deck[activePlayer][i] <= gold) {
+branch  0 taken 85% (fallthrough)
+branch  1 taken 15%
+branch  2 taken 13% (fallthrough)
+branch  3 taken 87%
+    18203:  202:				availableTreasureDeck++;
+        -:  203:			}
+        -:  204:		}
+        -:  205:		
+   173424:  206:		for (i = 0; i < state.discardCount[activePlayer]; i++) {
+branch  0 taken 99%
+branch  1 taken 1% (fallthrough)
+   171424:  207:			if (state.discard[activePlayer][i] >= copper && state.deck[activePlayer][i] <= gold) {
+branch  0 taken 85% (fallthrough)
+branch  1 taken 15%
+branch  2 taken 26% (fallthrough)
+branch  3 taken 74%
+    37693:  208:				availableTreasureDiscard++;
+        -:  209:			}
+        -:  210:		}
+     2000:  211:		printf("Treasure available in Player %d\'s deck: %d\n", activePlayer, availableTreasureDeck);
+call    0 returned 100%
+     2000:  212:		printf("Treasure available in Player %d\'s discard pile: %d\n", activePlayer, availableTreasureDiscard);
+call    0 returned 100%
+        -:  213:
+        -:  214:		/* CALL CARD EFFECT!!! */
+     2000:  215:		result = cardEffect(adventurer, choice1, choice2, choice3, &state, handPos, &bonus);
+call    0 returned 100%
+     2000:  216:		printf("Result: %d\n", result);
+call    0 returned 100%
+        -:  217:
+        -:  218:		/* CHECK RESULTS */
+        -:  219:
+        -:  220:		//Check return value -- Adventurer should always return 0.
+     2000:  221:		assertEqual(result, 0);
+call    0 returned 100%
+        -:  222:
+        -:  223:		//Check everything else
+     2000:  224:		testResults(&state, &oracle, activePlayer, handPos, availableTreasureDeck);
+call    0 returned 100%
+        -:  225:
+     2000:  226:		printf("\n----------------------------------------------------------------------\n\n");
+call    0 returned 100%
+     2000:  227:		printf("TEST RESULTS:\n");
+call    0 returned 100%
+     2000:  228:		printf("Number of Passes: %d\n", numPass);
+call    0 returned 100%
+     2000:  229:		printf("Number of Failures: %d\n", numFail);
+call    0 returned 100%
+     2000:  230:		printf("\n----------------------------------------------------------------------\n");
+call    0 returned 100%
+        -:  231:
+     2000:  232:		if (numFail > 0) {
+branch  0 taken 100% (fallthrough)
+branch  1 taken 0%
+     2000:  233:			totalFailures++;
+        -:  234:		}
+        -:  235:		else {
+    #####:  236:			totalPasses++;
+        -:  237:		}
+        -:  238:	}
+        -:  239:
+        1:  240:	percentPass = ((double)totalPasses / (double)NUM_TESTS) * 100;
+        1:  241:	percentFailure = ((double)totalFailures / (double)NUM_TESTS) * 100;
+        -:  242:
+        -:  243:
+        1:  244:	printf("ALL TESTS:\n");
+call    0 returned 100%
+        1:  245:	printf("Tests with No Identified Failures:\t%d / %d\n", totalPasses, NUM_TESTS);
+call    0 returned 100%
+        1:  246:	printf("\t\tPercentage Passed:\t%.2f%%\n", percentPass);
+call    0 returned 100%
+        1:  247:	printf("Tests with Identified Failures:\t\t%d / %d\n", totalFailures, NUM_TESTS);
+call    0 returned 100%
+        1:  248:	printf("\t\tPercentage Failed:\t%.2f%%\n", percentFailure);
+call    0 returned 100%
+        1:  249:	assertEqual(totalPasses + totalFailures, 2000);
+call    0 returned 100%
+        1:  250:	printf("----------------------------------------------------------------------\n");
+call    0 returned 100%
+        1:  251:	return 0;
+        -:  252:}
+        -:  253:
+        -:  254:/* 
+        -:  255:** getRandNum -- returns a pseudorandom integer with a minimum possible value of
+        -:  256:** min and a maximum possible value of max.
+        -:  257:*/
+function getRandNum called 64648058 returned 100% blocks executed 100%
+ 64648058:  258:int getRandNum(int min, int max) {
+ 64648058:  259:	int num = (rand() % (max - min + 1)) + min;
+call    0 returned 100%
+ 64648058:  260:	return num;
+        -:  261:}
+        -:  262:
+        -:  263:/*
+        -:  264:** getRandNumPosNeg -- returns a pseudorandom signed integer between -RAND_MAX/2 and 
+        -:  265:** RAND_MAX/2.
+        -:  266:*/
+function getRandNumPosNeg called 10000 returned 100% blocks executed 100%
+    10000:  267:int getRandNumPosNeg() {
+        -:  268:	int m, n;
+    10000:  269:	m = getRandNum(0, RAND_MAX);
+call    0 returned 100%
+    10000:  270:	n = RAND_MAX / 2;
+    10000:  271:	return m - n;
+        -:  272:}
+        -:  273:
+        -:  274:/*
+        -:  275:** assertEqual -- asserts that its two integer arguments are equal. If they are, it increments the
+        -:  276:** global numPass variable and returns 1 (true); if they are not, it increments the global numFail
+        -:  277:** variable and returns 0 (false).
+        -:  278:*/
+function assertEqual called 27776 returned 100% blocks executed 100%
+    27776:  279:int assertEqual(int a, int b) {
+    27776:  280:	if (a == b) {
+branch  0 taken 65% (fallthrough)
+branch  1 taken 35%
+    18001:  281:		numPass++;
+    18001:  282:		return 1;
+        -:  283:	}
+        -:  284:	else {
+     9775:  285:		numFail++;
+     9775:  286:		return 0;
+        -:  287:	}
+        -:  288:}
+        -:  289:
+        -:  290:
+        -:  291:/*
+        -:  292:** testResults -- evaluates the gameState struct used for testing (*state) against a test oracle based
+        -:  293:** on the state's values before cardEffect was executed (*oracle). The integer arguments activePlayer
+        -:  294:** and handPos represent the player who played the card and the position the card was played from in
+        -:  295:** that player's hand, respectively. The integer availableTreasureDeck represents the number of treasure
+        -:  296:** cards the player's deck was randomly initialized with (nonnegative). For each test case, a call is
+        -:  297:** made to assertEqual, which increments the numPass or numFail global variables according to whether
+        -:  298:** or not the resulting game state matches the expected outcome of the card's effect.
+        -:  299:*/
+function testResults called 2000 returned 100% blocks executed 88%
+     2000:  300:void testResults(struct gameState *state, struct gameState *oracle, int activePlayer, int handPos, int availableTreasureDeck) {
+        -:  301:	int result, expected, i;
+        -:  302:	
+        -:  303:	// 1. Active player's hand count has been increased by 2 - 1 = 1. (+ 2 treasures, -1 played Adventure).
+        -:  304:	// Originally, I intended to check the case for a player's deck and discard pile containing fewer than
+        -:  305:	// 2 treasures, but as stated in above comments, these inputs contributed to program crashes. All tests
+        -:  306:	// should cause the player to gain precisely 2 treasures (and lose the Adventure, but I know from my
+        -:  307:	// Assignment 3 that this is not the case.)
+     2000:  308:	result = state->handCount[activePlayer];
+     2000:  309:	expected = oracle->handCount[activePlayer] + 1;
+     2000:  310:	if (assertEqual(result, expected) == 0) {
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+    #####:  311:		printf("Test Failed: Player %d\'s hand count not increased from %d to %d.\n",
+call    0 never executed
+        -:  312:			activePlayer, oracle->handCount[activePlayer], expected);
+    #####:  313:		printf("\tPlayer %d\'s hand count: %d\n", activePlayer, result);
+call    0 never executed
+        -:  314:	}
+        -:  315:		
+        -:  316:	// 2. All other players' hand counts are the same.
+    10000:  317:	for (i = 0; i < MAX_PLAYERS; i++) {
+branch  0 taken 80%
+branch  1 taken 20% (fallthrough)
+     8000:  318:		if (i != activePlayer) {
+branch  0 taken 75% (fallthrough)
+branch  1 taken 25%
+     6000:  319:			result = state->handCount[i];
+     6000:  320:			expected = oracle->handCount[i];
+     6000:  321:			if (assertEqual(result, expected) == 0) {
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+    #####:  322:				printf("Test Failed: Non-active player %d\'s hand count changed from %d to %d.\n",
+call    0 never executed
+        -:  323:					i, expected, result);
+        -:  324:			}
+        -:  325:		}
+        -:  326:	}
+        -:  327:	
+        -:  328:	// 3. Active player's deck count is modified appropriately. The deck count should be equal to the original
+        -:  329:	// deck count minus the difference between the resulting discardCount and the original discardCount plus 2
+        -:  330:	// (for the 2 treasures added to the hand).
+     2000:  331:	result = state->deckCount[activePlayer];
+     2000:  332:	expected = oracle->deckCount[activePlayer] - (state->discardCount[activePlayer] - oracle->discardCount[activePlayer] + 2);
+     2000:  333:	if (assertEqual(result, expected) == 0) {
+call    0 returned 100%
+branch  1 taken 100% (fallthrough)
+branch  2 taken 0%
+     2000:  334:		printf("Test Failed: Deck count for Player %d was not modified correctly.\n", activePlayer);
+call    0 returned 100%
+     2000:  335:		printf("\tExpected Deck Count: %d;\tResulting Deck Count: %d", expected, result);
+call    0 returned 100%
+        -:  336:	}
+        -:  337:
+        -:  338:	// 4. All other players' deck counts are the same.
+    10000:  339:	for (i = 0; i < MAX_PLAYERS; i++) {
+branch  0 taken 80%
+branch  1 taken 20% (fallthrough)
+     8000:  340:		if (i != activePlayer) {
+branch  0 taken 75% (fallthrough)
+branch  1 taken 25%
+     6000:  341:			result = state->deckCount[i];
+     6000:  342:			expected = oracle->deckCount[i];
+     6000:  343:			if (assertEqual(result, expected) == 0) {
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+    #####:  344:				printf("Test Failed: Non-active player %d\'s deck count changed from %d to %d.\n",
+call    0 never executed
+        -:  345:					i, expected, result);
+        -:  346:			}
+        -:  347:		}
+        -:  348:	}
+        -:  349:	
+        -:  350:	// 5. Active player's discardCount has been updated appropriately. If there were at least 2 treasures
+        -:  351:	// in the player's deck, the discardCount should simply be the original discard count plus the difference 
+        -:  352:	// between the original deck count and the current deck count minus the 2 treasures moved to the player's 
+        -:  353:	// hand. Otherwise, since the discard pile was shuffled randomly into the player's deck, it's not possible
+        -:  354:	// to tell how many cards it SHOULD have taken to locate the remaining necessary cards in the shuffed
+        -:  355:	// discard-pile-turned-deck. I can only check to verify that no cards were "lost": current deck count + 
+        -:  356:	// current discard count should equal the original deck count + original discard count - 2. This should
+        -:  357:	// be true regardless of whether or not there were at least 2 treasure cards in the player's deck.
+     2000:  358:	if (availableTreasureDeck >= 2) {
+branch  0 taken 89% (fallthrough)
+branch  1 taken 11%
+     1775:  359:		result = state->discardCount[activePlayer];
+     1775:  360:		expected = oracle->discardCount[activePlayer] + (oracle->deckCount[activePlayer] - state->deckCount[activePlayer] - 2);
+     1775:  361:		if (assertEqual(result, expected) == 0) {
+call    0 returned 100%
+branch  1 taken 100% (fallthrough)
+branch  2 taken 0%
+     1775:  362:			printf("Test Failed: Player %d\'s discard count not changed from %d to %d.\n",
+call    0 returned 100%
+        -:  363:				activePlayer, oracle->discardCount[activePlayer], expected);
+     1775:  364:			printf("\tResulting Discard Count: %d\n", result);
+call    0 returned 100%
+        -:  365:		}
+        -:  366:	}
+     2000:  367:	result = state->deckCount[activePlayer] + state->discardCount[activePlayer];
+     2000:  368:	expected = oracle->deckCount[activePlayer] + oracle->discardCount[activePlayer] - 2;
+     2000:  369:	if (assertEqual(result, expected) == 0) {
+call    0 returned 100%
+branch  1 taken 100% (fallthrough)
+branch  2 taken 0%
+     2000:  370:		printf("Test Failed: Cards were lost.\n");
+call    0 returned 100%
+     2000:  371:		printf("\tOriginal Discard Count + Deck Count: %d\n",
+call    0 returned 100%
+     2000:  372:			oracle->deckCount[activePlayer] + oracle->discardCount[activePlayer]);
+     2000:  373:		printf("\tCurrent Discard Count + Deck Count (should be original - 2): %d\n",
+call    0 returned 100%
+        -:  374:			result);
+        -:  375:	}
+        -:  376:		
+        -:  377:	// 6. playedCardCount has been increased by 1.
+     2000:  378:	result = state->playedCardCount;
+     2000:  379:	expected = oracle->playedCardCount + 1;
+     2000:  380:	if (assertEqual(result, expected) == 0) {
+call    0 returned 100%
+branch  1 taken 100% (fallthrough)
+branch  2 taken 0%
+     2000:  381:		printf("Test Failed: playedCardCount not incremented from %d to %d.\n", 
+call    0 returned 100%
+        -:  382:			oracle->playedCardCount, expected);
+        -:  383:	}
+        -:  384:
+        -:  385:	
+        -:  386:	// 7. Last card in playedCards array is Adventurer
+     2000:  387:	result = state->playedCards[state->playedCardCount - 1];
+     2000:  388:	expected = adventurer;
+     2000:  389:	if (assertEqual(result, expected) == 0) {
+call    0 returned 100%
+branch  1 taken 100% (fallthrough)
+branch  2 taken 0%
+     2000:  390:		printf("Test Failed: Last card in playedCards array (%d) is not adventurer (= 7).\n", result);
+call    0 returned 100%
+        -:  391:	}
+        -:  392:
+        -:  393:	// 9. Coins should not have been changed
+     2000:  394:	result = state->coins;
+     2000:  395:	expected = oracle->coins;
+     2000:  396:	if (assertEqual(result, expected) == 0) {
+call    0 returned 100%
+branch  1 taken 0% (fallthrough)
+branch  2 taken 100%
+    #####:  397:		printf("Test Failed: Game coins changed from %d to %d.\n", expected, result);
+call    0 never executed
+        -:  398:	}
+        -:  399:
+        -:  400:	// Unfortunately, I was unable to figure out a way to design a test that would uncover the
+        -:  401:	// bug I introduced in assignment 2 that caused the first index of the discard array never
+        -:  402:	// to be updated. Because inputs are random, it is difficult to predict what SHOULD be at
+        -:  403:	// discard[player][0] and what shouldn't be. I found that simply testing whether it was a
+        -:  404:	// valid card or not (between curse and treasure_map) was not sufficient to reveal the bug,
+        -:  405:	// since the discard array was initialized with random valid cards. My best bet would be to
+        -:  406:	// explicitly target that index in the array like I did in Assignment 3, but that doesn't
+        -:  407:	// seem in keeping with the spirit of random testing.
+        -:  408:
+     2000:  409:}
